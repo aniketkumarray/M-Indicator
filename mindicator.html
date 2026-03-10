@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Mindicator — Intelligent Travel Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0A0E1A;
+    --bg2: #0F1525;
+    --card: #141B2D;
+    --card2: #1A2240;
+    --border: rgba(99,130,255,0.15);
+    --accent: #4F7BFF;
+    --accent2: #7B5FFF;
+    --green: #00D9A5;
+    --orange: #FF8C42;
+    --red: #FF4D6D;
+    --yellow: #FFD166;
+    --text: #E8EEFF;
+    --text2: #8A95B8;
+    --text3: #4A5580;
+    --metro-red: #E63946;
+    --metro-yellow: #FFB703;
+    --metro-aqua: #0096C7;
+    --metro-purple: #7B2FBE;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── APP SHELL ── */
+  .app-shell {
+    display: flex;
+    flex-direction: column;
+    max-width: 420px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    background: var(--bg);
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .brand-name {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .topbar-right { display: flex; gap: 12px; align-items: center; }
+  .icon-btn {
+    width: 36px; height: 36px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover { background: var(--card2); border-color: var(--accent); }
+
+  /* ── NETWORK ALERT ── */
+  .net-alert {
+    background: rgba(255,77,109,0.15);
+    border-bottom: 1px solid rgba(255,77,109,0.3);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #FF4D6D;
+    font-weight: 500;
+    display: none;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; flex-direction: column; flex: 1; animation: fadeIn 0.3s ease; }
+  .screen.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ── HOME SCREEN ── */
+  .home-hero {
+    padding: 24px 20px 20px;
+    background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+  }
+  .greeting { font-size: 13px; color: var(--text2); font-weight: 500; margin-bottom: 4px; }
+  .hero-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 20px; line-height: 1.2; }
+  .hero-title span { color: var(--accent); }
+
+  .search-box {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .search-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(79,123,255,0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .search-box:hover { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79,123,255,0.1); }
+  .search-box:hover::before { opacity: 1; }
+  .search-icon { font-size: 20px; }
+  .search-placeholder { flex: 1; }
+  .search-placeholder strong { display: block; font-size: 14px; font-weight: 600; color: var(--text); }
+  .search-placeholder small { font-size: 12px; color: var(--text3); }
+  .search-gps {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+
+  /* Quick Actions */
+  .quick-actions {
+    padding: 16px 20px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .quick-actions::-webkit-scrollbar { display: none; }
+  .qa-chip {
+    flex-shrink: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .qa-chip:hover, .qa-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Live Updates Strip */
+  .live-strip {
+    margin: 0 20px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .live-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 3px rgba(0,217,165,0.2);
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(0,217,165,0.2); }
+    50% { box-shadow: 0 0 0 6px rgba(0,217,165,0.05); }
+  }
+  .live-text { font-size: 12px; color: var(--text2); flex: 1; }
+  .live-text strong { color: var(--text); }
+  .live-badge {
+    background: rgba(0,217,165,0.15);
+    color: var(--green);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Starred Trains */
+  .section-header {
+    padding: 0 20px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .section-title { font-size: 14px; font-weight: 700; }
+  .section-link { font-size: 12px; color: var(--accent); cursor: pointer; }
+
+  .train-card {
+    margin: 0 20px 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .train-card::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+  }
+  .train-card.delayed::after { background: var(--orange); }
+  .train-card.ontime::after { background: var(--green); }
+  .train-card:hover { border-color: var(--accent); transform: translateX(3px); }
+
+  .tc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .tc-name { font-size: 14px; font-weight: 700; }
+  .tc-status {
+    font-size: 11px; font-weight: 600;
+    padding: 3px 8px; border-radius: 20px;
+  }
+  .status-ontime { background: rgba(0,217,165,0.15); color: var(--green); }
+  .status-delayed { background: rgba(255,140,66,0.15); color: var(--orange); }
+  .tc-meta { display: flex; gap: 12px; align-items: center; }
+  .tc-meta-item { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+  .tc-platform {
+    background: var(--card2);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px; font-weight: 700;
+    color: var(--yellow);
+    display: flex; align-items: center; gap: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .verified-badge { color: var(--green); font-size: 10px; }
+
+  /* Map Preview */
+  .map-preview-card {
+    margin: 0 20px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .map-preview-card:hover { border-color: var(--accent); }
+  .map-preview-inner {
+    position: relative;
+    height: 140px;
+    background: #0d1929;
+    overflow: hidden;
+  }
+  .map-preview-inner canvas { width: 100%; height: 100%; }
+  .map-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--card) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .map-expand-btn {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(10,14,26,0.85);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+  }
+  .map-train-count {
+    position: absolute;
+    bottom: 14px; left: 14px;
+    background: rgba(10,14,26,0.85);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ── SEARCH SCREEN ── */
+  .search-screen-header {
+    padding: 16px 20px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .back-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  }
+  .back-btn {
+    width: 32px; height: 32px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { border-color: var(--accent); }
+  .back-label { font-size: 14px; font-weight: 700; }
+
+  .route-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+  }
+  .route-input-box {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+  }
+  .route-input-box.focused { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,123,255,0.1); }
+  .route-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-from { background: var(--accent); }
+  .dot-to { background: var(--green); }
+  .route-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .route-input::placeholder { color: var(--text3); }
+  .swap-btn {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px; height: 28px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .swap-btn:hover { border-color: var(--accent); transform: translateY(-50%) rotate(180deg); }
+
+  .search-suggestions {
+    padding: 16px 20px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .suggestion-group-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    margin-top: 16px;
+  }
+  .suggestion-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .suggestion-item:hover { border-color: var(--accent); background: var(--card2); }
+  .suggestion-icon {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .si-purple { background: rgba(123,95,255,0.15); }
+  .si-blue { background: rgba(79,123,255,0.15); }
+  .si-green { background: rgba(0,217,165,0.15); }
+  .suggestion-text strong { font-size: 13px; font-weight: 600; display: block; }
+  .suggestion-text small { font-size: 11px; color: var(--text2); }
+
+  /* Search AI button */
+  .ai-search-btn {
+    margin: 16px 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 14px;
+    padding: 14px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    cursor: pointer;
+    font-size: 14px; font-weight: 700;
+    transition: all 0.2s;
+    box-shadow: 0 8px 24px rgba(79,123,255,0.3);
+  }
+  .ai-search-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(79,123,255,0.4); }
+
+  /* ── ROUTES SCREEN ── */
+  .routes-header {
+    padding: 16px 20px 0;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .routes-from-to {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .route-arrow { color: var(--text3); font-size: 12px; }
+  .origin-label { color: var(--accent); }
+  .dest-label { color: var(--green); }
+  .ai-tag {
+    background: linear-gradient(135deg, rgba(79,123,255,0.2), rgba(123,95,255,0.2));
+    border: 1px solid rgba(79,123,255,0.3);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .routes-tabs {
+    display: flex; gap: 8px;
+    padding-bottom: 0;
+  }
+  .route-tab {
+    flex: 1;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 12px; font-weight: 600;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .route-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .routes-list {
+    padding: 16px 20px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .route-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .route-card.best { border-color: var(--accent); }
+  .route-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+  .best-tag {
+    position: absolute;
+    top: -1px; right: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 0 0 8px 8px;
+    padding: 3px 10px;
+    font-size: 10px; font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #fff;
+  }
+  .rc-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .rc-time { font-size: 22px; font-weight: 800; letter-spacing: -1px; }
+  .rc-time small { font-size: 12px; font-weight: 500; color: var(--text2); margin-left: 2px; }
+  .rc-eta {
+    text-align: right;
+  }
+  .rc-eta-val { font-size: 13px; font-weight: 700; color: var(--green); }
+  .rc-eta-label { font-size: 11px; color: var(--text3); }
+
+  /* Route journey line */
+  .journey-line {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .journey-line::-webkit-scrollbar { display: none; }
+  .jl-segment {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+  }
+  .jl-node {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .jl-line {
+    height: 3px;
+    min-width: 30px;
+    flex: 1;
+    border-radius: 2px;
+  }
+  .jl-label {
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text3);
+    white-space: nowrap;
+  }
+  .mode-local { background: rgba(79,123,255,0.2); color: var(--accent); }
+  .mode-metro-red { background: rgba(230,57,70,0.2); color: var(--metro-red); }
+  .mode-metro-yellow { background: rgba(255,183,3,0.2); color: var(--metro-yellow); }
+  .mode-metro-aqua { background: rgba(0,150,199,0.2); color: var(--metro-aqua); }
+  .mode-walk { background: rgba(138,149,184,0.15); color: var(--text2); }
+  .line-local { background: var(--accent); }
+  .line-metro-red { background: var(--metro-red); }
+  .line-metro-yellow { background: var(--metro-yellow); }
+  .line-metro-aqua { background: var(--metro-aqua); }
+  .line-walk { background: var(--text3); background-image: repeating-linear-gradient(90deg, var(--text3) 0, var(--text3) 4px, transparent 4px, transparent 8px); background-color: transparent; }
+
+  .rc-footer { display: flex; gap: 8px; flex-wrap: wrap; }
+  .rc-tag {
+    background: var(--card2);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px; font-weight: 600;
+    color: var(--text2);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .rc-tag.coach { color: var(--accent); }
+  .rc-tag.platform { color: var(--yellow); }
+  .rc-tag.verified { color: var(--green); }
+
+  /* ── MAP SCREEN ── */
+  .map-screen { position: relative; }
+  .map-container {
+    flex: 1;
+    position: relative;
+    min-height: 450px;
+    background: #0d1929;
+  }
+  #map-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .map-controls {
+    position: absolute;
+    top: 16px; right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .map-ctrl-btn {
+    width: 36px; height: 36px;
+    background: rgba(10,14,26,0.9);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s;
+  }
+  .map-ctrl-btn:hover { border-color: var(--accent); }
+  .map-legend {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, var(--bg) 0%, rgba(10,14,26,0.95) 80%, transparent 100%);
+    padding: 20px 20px 12px;
+  }
+  .map-train-info {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .map-train-info:hover { border-color: var(--accent); }
+  .train-icon-circle {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .train-info-text { flex: 1; }
+  .train-info-name { font-size: 14px; font-weight: 700; }
+  .train-info-sub { font-size: 12px; color: var(--text2); }
+  .train-eta-badge {
+    background: rgba(0,217,165,0.15);
+    border: 1px solid rgba(0,217,165,0.3);
+    border-radius: 10px;
+    padding: 6px 10px;
+    text-align: center;
+  }
+  .train-eta-badge .eta-min { font-size: 16px; font-weight: 800; color: var(--green); font-family: 'JetBrains Mono', monospace; }
+  .train-eta-badge .eta-label { font-size: 10px; color: var(--text2); }
+
+  .line-indicators {
+    display: flex; gap: 8px;
+    flex-wrap: wrap;
+  }
+  .line-ind {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600; color: var(--text2);
+  }
+  .line-ind-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+
+  /* ── ROUTE DETAIL SCREEN ── */
+  .detail-header {
+    padding: 16px 20px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-journey-title { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .detail-journey-sub { font-size: 12px; color: var(--text2); }
+  .detail-stats {
+    display: flex; gap: 8px;
+    margin-top: 12px;
+  }
+  .stat-chip {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+  }
+  .stat-val { font-size: 16px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+  .stat-lbl { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  .steps-list { padding: 16px 20px; flex: 1; overflow-y: auto; }
+  .step-item {
+    display: flex; gap: 16px;
+    margin-bottom: 0;
+    position: relative;
+  }
+  .step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40px;
+    flex-shrink: 0;
+  }
+  .step-circle {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .step-line {
+    width: 2px;
+    flex: 1;
+    min-height: 30px;
+    margin: 4px 0;
+  }
+  .step-right {
+    flex: 1;
+    padding-bottom: 24px;
+  }
+  .step-action { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .step-detail { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+  .step-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .step-tag {
+    background: var(--card2);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px; font-weight: 600;
+    color: var(--text2);
+  }
+  .step-tag.highlight { background: rgba(79,123,255,0.15); color: var(--accent); }
+  .step-tag.warn { background: rgba(255,209,102,0.15); color: var(--yellow); }
+
+  /* AI Coach card */
+  .ai-coach-card {
+    margin: 0 20px 16px;
+    background: linear-gradient(135deg, rgba(79,123,255,0.1), rgba(123,95,255,0.1));
+    border: 1px solid rgba(79,123,255,0.3);
+    border-radius: 16px;
+    padding: 14px;
+    display: flex; gap: 12px;
+  }
+  .ai-coach-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .ai-coach-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .ai-coach-text strong { color: var(--accent); }
+
+  /* Platform notification toast */
+  .toast {
+    position: fixed;
+    bottom: 72px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    z-index: 999;
+    background: var(--card);
+    border: 1px solid rgba(255,209,102,0.4);
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+    min-width: 300px;
+    max-width: 380px;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast-icon { font-size: 22px; }
+  .toast-text { flex: 1; font-size: 12px; }
+  .toast-text strong { font-size: 13px; display: block; margin-bottom: 2px; }
+  .toast-close { cursor: pointer; color: var(--text3); font-size: 18px; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    display: flex;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 8px 0 env(safe-area-inset-bottom, 8px);
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px 4px;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .nav-item.active .nav-icon { color: var(--accent); }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 0 0 4px 4px;
+  }
+  .nav-icon { font-size: 22px; color: var(--text3); }
+  .nav-label { font-size: 10px; font-weight: 600; color: var(--text3); }
+
+  /* ── METRO LINE BADGES ── */
+  .metro-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .metro-badge.red { background: rgba(230,57,70,0.2); color: var(--metro-red); border: 1px solid rgba(230,57,70,0.3); }
+  .metro-badge.yellow { background: rgba(255,183,3,0.2); color: var(--metro-yellow); border: 1px solid rgba(255,183,3,0.3); }
+  .metro-badge.aqua { background: rgba(0,150,199,0.2); color: var(--metro-aqua); border: 1px solid rgba(0,150,199,0.3); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Loading state */
+  .ai-loading {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--text2);
+    padding: 20px;
+    justify-content: center;
+  }
+  .loading-dots { display: flex; gap: 4px; }
+  .loading-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: bounce 1.2s infinite;
+  }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* Interchange alert */
+  .interchange-alert {
+    margin: 0 20px 12px;
+    background: rgba(255,140,66,0.1);
+    border: 1px solid rgba(255,140,66,0.3);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .ia-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .ia-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .ia-text strong { display: block; font-size: 13px; color: var(--text); margin-bottom: 3px; }
+
+  /* Disruption banner */
+  .disruption-banner {
+    margin: 0 20px 12px;
+    background: rgba(255,77,109,0.1);
+    border: 1px solid rgba(255,77,109,0.3);
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--text2);
+    display: none;
+  }
+  .disruption-banner strong { color: var(--red); }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-icon">🚆</div>
+      <div class="brand-name">Mindicator</div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" onclick="showToast()" title="Platform alerts">🔔</div>
+      <div class="icon-btn" onclick="toggleDisruption()" title="Network status">📡</div>
+    </div>
+  </div>
+
+  <!-- DISRUPTION BANNER -->
+  <div class="disruption-banner" id="disruption-banner">
+    <strong>⚠️ Central Line Disruption:</strong> Delays of 8–12 min between Kurla and Thane. AI routing around it.
+  </div>
+
+  <!-- SCREEN: HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="home-hero">
+      <div class="greeting">📍 Detected: Mumbai CST</div>
+      <div class="hero-title">Where are you<br>going <span>today?</span></div>
+      <div class="search-box" onclick="showSearch()">
+        <div class="search-icon">🔍</div>
+        <div class="search-placeholder">
+          <strong>Search destination…</strong>
+          <small>AI finds your best route</small>
+        </div>
+        <div class="search-gps">📍</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <div class="qa-chip active" onclick="showRoutes('CST','BKC')">🏢 BKC</div>
+      <div class="qa-chip" onclick="showRoutes('CST','Andheri')">✈️ Andheri</div>
+      <div class="qa-chip" onclick="showRoutes('CST','Dadar')">🚉 Dadar</div>
+      <div class="qa-chip" onclick="showRoutes('CST','Thane')">🌿 Thane</div>
+      <div class="qa-chip" onclick="showRoutes('CST','Borivali')">🏘️ Borivali</div>
+    </div>
+
+    <!-- Live Strip -->
+    <div class="live-strip">
+      <div class="live-dot"></div>
+      <div class="live-text">Next train: <strong>11:42 Fast (Borivali) · Platform 4</strong></div>
+      <div class="live-badge">LIVE</div>
+    </div>
+
+    <!-- Map Preview -->
+    <div class="section-header">
+      <div class="section-title">🗺️ Train Radar</div>
+      <div class="section-link" onclick="showMap()">Full Map →</div>
+    </div>
+    <div class="map-preview-card" onclick="showMap()">
+      <div class="map-preview-inner">
+        <canvas id="mini-map" width="400" height="140"></canvas>
+        <div class="map-overlay"></div>
+        <div class="map-expand-btn" onclick="showMap()">Expand ↗</div>
+        <div class="map-train-count">🚆 <span>14 trains tracked</span></div>
+      </div>
+    </div>
+
+    <!-- Starred Trains -->
+    <div class="section-header">
+      <div class="section-title">⭐ Starred Trains</div>
+      <div class="section-link">Manage</div>
+    </div>
+
+    <div class="train-card ontime" onclick="showDetail()">
+      <div class="tc-top">
+        <div class="tc-name">Borivali Fast · 11:42</div>
+        <div class="tc-status status-ontime">On Time</div>
+      </div>
+      <div class="tc-meta">
+        <div class="tc-meta-item">⏱ 4 min away</div>
+        <div class="tc-meta-item">🚉 CST</div>
+        <div class="tc-platform">PF <span>4</span> <span class="verified-badge">✓</span></div>
+      </div>
+    </div>
+
+    <div class="train-card delayed" onclick="showDetail()">
+      <div class="tc-top">
+        <div class="tc-name">Thane Slow · 11:48</div>
+        <div class="tc-status status-delayed">+7 min</div>
+      </div>
+      <div class="tc-meta">
+        <div class="tc-meta-item">⏱ 11 min away</div>
+        <div class="tc-meta-item">🚉 Kurla</div>
+        <div class="tc-platform">PF <span>6</span></div>
+      </div>
+    </div>
+
+    <div class="train-card ontime" style="margin-bottom: 16px;" onclick="showDetail()">
+      <div class="tc-top">
+        <div class="tc-name">Churchgate AC · 11:55</div>
+        <div class="tc-status status-ontime">On Time</div>
+      </div>
+      <div class="tc-meta">
+        <div class="tc-meta-item">⏱ 18 min away</div>
+        <div class="tc-meta-item">🚉 CST</div>
+        <div class="tc-platform">PF <span>2</span> <span class="verified-badge">✓</span></div>
+      </div>
+    </div>
+
+    <!-- Metro Status -->
+    <div class="section-header">
+      <div class="section-title">🚇 Metro Status</div>
+      <div class="section-link">All Lines</div>
+    </div>
+    <div style="padding: 0 20px 20px; display: flex; flex-wrap: wrap; gap: 8px;">
+      <div class="rc-tag" style="background: rgba(230,57,70,0.1); color: var(--metro-red);">🔴 Line 1 · Normal</div>
+      <div class="rc-tag" style="background: rgba(255,183,3,0.1); color: var(--metro-yellow);">🟡 Line 2A · 3 min delay</div>
+      <div class="rc-tag" style="background: rgba(255,183,3,0.1); color: var(--metro-yellow);">🟡 Line 7 · Normal</div>
+      <div class="rc-tag" style="background: rgba(138,149,184,0.1); color: var(--text2);">🔵 Line 3 · Phase 2</div>
+    </div>
+  </div>
+
+  <!-- SCREEN: SEARCH -->
+  <div class="screen" id="screen-search">
+    <div class="search-screen-header">
+      <div class="back-row">
+        <div class="back-btn" onclick="goHome()">←</div>
+        <div class="back-label">Plan Journey</div>
+      </div>
+      <div class="route-inputs">
+        <div class="route-input-box focused">
+          <div class="route-dot dot-from"></div>
+          <input class="route-input" id="from-input" placeholder="From (auto-detected)" value="CST / Mumbai CSMT">
+        </div>
+        <div class="route-input-box">
+          <div class="route-dot dot-to"></div>
+          <input class="route-input" id="to-input" placeholder="Where to?" autofocus>
+        </div>
+        <div class="swap-btn" onclick="swapInputs()" title="Swap">⇅</div>
+      </div>
+    </div>
+
+    <div class="search-suggestions">
+      <div class="suggestion-group-title">📌 Frequent</div>
+      <div class="suggestion-item" onclick="showRoutes('CST','BKC')">
+        <div class="suggestion-icon si-purple">🏢</div>
+        <div class="suggestion-text"><strong>BKC (Bandra Kurla Complex)</strong><small>Bandra or Vidyanagari Metro</small></div>
+      </div>
+      <div class="suggestion-item" onclick="showRoutes('CST','Andheri')">
+        <div class="suggestion-icon si-blue">✈️</div>
+        <div class="suggestion-text"><strong>Andheri</strong><small>Central · Western Line</small></div>
+      </div>
+
+      <div class="suggestion-group-title">🌟 Popular</div>
+      <div class="suggestion-item" onclick="showRoutes('CST','Dadar')">
+        <div class="suggestion-icon si-green">🚉</div>
+        <div class="suggestion-text"><strong>Dadar</strong><small>Central Hub · 20 min</small></div>
+      </div>
+      <div class="suggestion-item" onclick="showRoutes('CST','Thane')">
+        <div class="suggestion-icon si-blue">🌿</div>
+        <div class="suggestion-text"><strong>Thane</strong><small>Central Line · 45 min</small></div>
+      </div>
+      <div class="suggestion-item" onclick="showRoutes('CST','Borivali')">
+        <div class="suggestion-icon si-purple">🏘️</div>
+        <div class="suggestion-text"><strong>Borivali</strong><small>Western Line · 70 min</small></div>
+      </div>
+      <div class="suggestion-item" onclick="showRoutes('CST','Navi Mumbai')">
+        <div class="suggestion-icon si-green">🌊</div>
+        <div class="suggestion-text"><strong>Navi Mumbai (Belapur)</strong><small>Harbour Line · 55 min</small></div>
+      </div>
+
+      <div class="suggestion-group-title">🚇 Metro Stations</div>
+      <div class="suggestion-item" onclick="showRoutes('CST','Ghatkopar')">
+        <div class="suggestion-icon si-blue">🔴</div>
+        <div class="suggestion-text"><strong>Ghatkopar Metro</strong><small>Line 1 (Red) · Interchange</small></div>
+      </div>
+      <div class="suggestion-item" onclick="showRoutes('CST','Versova')">
+        <div class="suggestion-icon si-purple">🔴</div>
+        <div class="suggestion-text"><strong>Versova</strong><small>Line 1 (Red) Terminal</small></div>
+      </div>
+    </div>
+
+    <div class="ai-search-btn" onclick="showRoutes('CST', document.getElementById('to-input').value || 'BKC')">
+      🤖 Find Best Routes with AI
+    </div>
+  </div>
+
+  <!-- SCREEN: ROUTES -->
+  <div class="screen" id="screen-routes">
+    <div class="routes-header">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="back-btn" onclick="showSearch()">←</div>
+          <div class="routes-from-to">
+            <span class="origin-label" id="route-from">CST</span>
+            <span class="route-arrow">→</span>
+            <span class="dest-label" id="route-to">BKC</span>
+          </div>
+        </div>
+        <div class="ai-tag">🤖 AI Routes</div>
+      </div>
+      <div class="routes-tabs">
+        <div class="route-tab active">Best Value</div>
+        <div class="route-tab">Fastest</div>
+        <div class="route-tab">Cheapest</div>
+      </div>
+    </div>
+
+    <div class="routes-list">
+      <!-- Route 1: Best -->
+      <div class="route-card best" onclick="showDetail()">
+        <div class="best-tag">⚡ BEST</div>
+        <div class="rc-top">
+          <div>
+            <div class="rc-time">38 <small>min</small></div>
+            <div style="font-size: 11px; color: var(--text3);">11:42 → 12:20 PM</div>
+          </div>
+          <div class="rc-eta">
+            <div class="rc-eta-val">Train in 4 min</div>
+            <div class="rc-eta-label">Next departure</div>
+          </div>
+        </div>
+        <div class="journey-line" style="gap: 4px; margin-bottom: 20px;">
+          <div class="jl-segment">
+            <div class="jl-node mode-local" style="font-size:9px">LOCAL<div class="jl-label">CST</div></div>
+            <div class="jl-line line-local" style="width:60px;"></div>
+          </div>
+          <div class="jl-segment">
+            <div class="jl-node mode-local" style="font-size:9px">→<div class="jl-label">Kurla</div></div>
+            <div class="jl-line line-walk" style="width:24px;"></div>
+          </div>
+          <div class="jl-segment">
+            <div class="jl-node mode-metro-red" style="font-size:9px">M1<div class="jl-label">Ghatkopar</div></div>
+            <div class="jl-line line-metro-red" style="width:40px;"></div>
+          </div>
+          <div class="jl-segment">
+            <div class="jl-node mode-walk" style="font-size:9px">🚶<div class="jl-label">BKC</div></div>
+          </div>
+        </div>
+        <div class="rc-footer">
+          <div class="rc-tag coach">🪑 Coach 4 → Easy exit</div>
+          <div class="rc-tag platform">PF 4 ✓</div>
+          <div class="rc-tag verified">🟢 Live Data</div>
+        </div>
+      </div>
+
+      <!-- AI Coach -->
+      <div class="ai-coach-card">
+        <div class="ai-coach-icon">🤖</div>
+        <div class="ai-coach-text">
+          <strong>AI Tip:</strong> Board Coach 4 at CST for the quickest exit at Dadar. At Kurla, walk to Gate 2 for Metro Line 1. Total walk time: ~4 min.
+        </div>
+      </div>
+
+      <!-- Route 2 -->
+      <div class="route-card" onclick="showDetail()">
+        <div class="rc-top">
+          <div>
+            <div class="rc-time">44 <small>min</small></div>
+            <div style="font-size: 11px; color: var(--text3);">11:48 → 12:32 PM</div>
+          </div>
+          <div class="rc-eta">
+            <div class="rc-eta-val">Train in 11 min</div>
+            <div class="rc-eta-label">Slow via Bandra</div>
+          </div>
+        </div>
+        <div class="journey-line" style="gap: 4px; margin-bottom: 20px;">
+          <div class="jl-segment">
+            <div class="jl-node mode-local" style="font-size:9px">LOCAL<div class="jl-label">CST</div></div>
+            <div class="jl-line line-local" style="width:70px;"></div>
+          </div>
+          <div class="jl-segment">
+            <div class="jl-node mode-local" style="font-size:9px">→<div class="jl-label">Dadar</div></div>
+            <div class="jl-line line-walk" style="width:24px;"></div>
+          </div>
+          <div class="jl-segment">
+            <div class="jl-node mode-metro-yellow" style="font-size:9px">M2<div class="jl-label">Bandra</div></div>
+            <div class="jl-line line-metro-yellow" style="width:40px;"></div>
+          </div>
+          <div class="jl-segment">
+            <div class="jl-node mode-walk" style="font-size:9px">🚶<div class="jl-label">BKC</div></div>
+          </div>
+        </div>
+        <div class="rc-footer">
+          <div class="rc-tag platform">PF 6</div>
+          <div class="rc-tag" style="color: var(--orange);">⚠️ 7 min delay</div>
+        </div>
+      </div>
+
+      <!-- Route 3 -->
+      <div class="route-card" onclick="showDetail()">
+        <div class="rc-top">
+          <div>
+            <div class="rc-time">52 <small>min</small></div>
+            <div style="font-size: 11px; color: var(--text3);">11:55 → 12:47 PM</div>
+          </div>
+          <div class="rc-eta">
+            <div class="rc-eta-val">Train in 18 min</div>
+            <div class="rc-eta-label">Direct AC</div>
+          </div>
+        </div>
+        <div class="journey-line" style="gap: 4px; margin-bottom: 20px;">
+          <div class="jl-segment">
+            <div class="jl-node mode-local" style="font-size:9px; background: rgba(0,217,165,0.15); color: var(--green);">AC<div class="jl-label">CST</div></div>
+            <div class="jl-line" style="width:80px; background: var(--green);"></div>
+          </div>
+          <div class="jl-segment">
+            <div class="jl-node mode-walk" style="font-size:9px;">🚶<div class="jl-label">BKC</div></div>
+          </div>
+        </div>
+        <div class="rc-footer">
+          <div class="rc-tag" style="color: var(--green);">❄️ AC Train</div>
+          <div class="rc-tag platform">PF 2 ✓</div>
+          <div class="rc-tag">₹ Check fare</div>
+        </div>
+      </div>
+
+      <div class="interchange-alert">
+        <div class="ia-icon">🔄</div>
+        <div class="ia-text">
+          <strong>Interchange at Kurla</strong>
+          Walk 4 min from Platform 6 to Metro Line 1 Gate 2. Follow blue signs for Metro.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN: MAP -->
+  <div class="screen" id="screen-map" style="flex:1; flex-direction:column;">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 20px; background: var(--bg2); border-bottom: 1px solid var(--border);">
+      <div class="back-btn" onclick="goHome()">←</div>
+      <div style="font-size: 14px; font-weight: 700;">Train Radar</div>
+      <div class="live-badge" style="margin-left: auto;">LIVE</div>
+    </div>
+    <div class="map-container" style="flex: 1; min-height: 380px;">
+      <canvas id="map-canvas" width="420" height="500" style="width:100%; height:100%;"></canvas>
+      <div class="map-controls">
+        <div class="map-ctrl-btn" onclick="mapZoom(1.2)" title="Zoom In">+</div>
+        <div class="map-ctrl-btn" onclick="mapZoom(0.8)" title="Zoom Out">−</div>
+        <div class="map-ctrl-btn" title="My Location">📍</div>
+        <div class="map-ctrl-btn" title="Layers">🗺️</div>
+      </div>
+      <div class="map-legend">
+        <div class="map-train-info" onclick="showDetail()">
+          <div class="train-icon-circle">🚆</div>
+          <div class="train-info-text">
+            <div class="train-info-name">Borivali Fast · 11:42</div>
+            <div class="train-info-sub">Between Dadar ↔ Bandra · 2 stops away</div>
+          </div>
+          <div class="train-eta-badge">
+            <div class="eta-min" id="eta-counter">4</div>
+            <div class="eta-label">min</div>
+          </div>
+        </div>
+        <div class="line-indicators">
+          <div class="line-ind"><div class="line-ind-dot" style="background: var(--accent)"></div> Western</div>
+          <div class="line-ind"><div class="line-ind-dot" style="background: var(--green)"></div> Central</div>
+          <div class="line-ind"><div class="line-ind-dot" style="background: var(--orange)"></div> Harbour</div>
+          <div class="line-ind"><div class="line-ind-dot" style="background: var(--metro-red)"></div> Metro L1</div>
+          <div class="line-ind"><div class="line-ind-dot" style="background: var(--metro-yellow)"></div> Metro L2</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN: ROUTE DETAIL -->
+  <div class="screen" id="screen-detail">
+    <div class="detail-header">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <div class="back-btn" onclick="showRoutes('CST','BKC')">←</div>
+        <div class="detail-journey-title">CST → BKC</div>
+      </div>
+      <div class="detail-journey-sub">Borivali Fast + Line 1 Metro • AI Recommended</div>
+      <div class="detail-stats">
+        <div class="stat-chip">
+          <div class="stat-val" style="color: var(--accent)">38</div>
+          <div class="stat-lbl">Total Min</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-val" style="color: var(--green)">4</div>
+          <div class="stat-lbl">Stops</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-val" style="color: var(--yellow)">₹22</div>
+          <div class="stat-lbl">Est. Fare</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-val" style="color: var(--accent2)">12:20</div>
+          <div class="stat-lbl">Arrive</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="steps-list">
+      <!-- Step 1 -->
+      <div class="step-item">
+        <div class="step-left">
+          <div class="step-circle" style="background: rgba(79,123,255,0.15); color: var(--accent);">📍</div>
+          <div class="step-line" style="background: var(--accent);"></div>
+        </div>
+        <div class="step-right">
+          <div class="step-action">Board at CST · Platform 4</div>
+          <div class="step-detail">Borivali Fast (11:42 AM) · Departs in 4 min</div>
+          <div class="step-tags">
+            <div class="step-tag highlight">Coach 4</div>
+            <div class="step-tag warn">PF 4 ✓ Verified</div>
+            <div class="step-tag">🔵 Western Line</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step-item">
+        <div class="step-left">
+          <div class="step-circle" style="background: rgba(79,123,255,0.1); color: var(--accent);">🚆</div>
+          <div class="step-line" style="background: var(--accent);"></div>
+        </div>
+        <div class="step-right">
+          <div class="step-action">Ride to Kurla (22 min)</div>
+          <div class="step-detail">Stay on train through Byculla, Matunga, Dadar, Sion, Kurla</div>
+          <div class="step-tags">
+            <div class="step-tag">5 stops</div>
+            <div class="step-tag highlight">Alight at Kurla</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step-item">
+        <div class="step-left">
+          <div class="step-circle" style="background: rgba(138,149,184,0.1); color: var(--text2);">🚶</div>
+          <div class="step-line" style="background: var(--metro-red);"></div>
+        </div>
+        <div class="step-right">
+          <div class="step-action">Walk to Metro Line 1</div>
+          <div class="step-detail">Exit Platform 6 → Follow Blue signs → Gate 2</div>
+          <div class="step-tags">
+            <div class="step-tag">4 min walk</div>
+            <div class="step-tag highlight">Gate 2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step-item">
+        <div class="step-left">
+          <div class="step-circle" style="background: rgba(230,57,70,0.15); color: var(--metro-red);">🔴</div>
+          <div class="step-line" style="background: var(--metro-red);"></div>
+        </div>
+        <div class="step-right">
+          <div class="step-action">Metro Line 1 (Red) → Marol Naka</div>
+          <div class="step-detail">Towards Versova · Ride 3 stops</div>
+          <div class="step-tags">
+            <div class="step-tag" style="color: var(--metro-red);">🔴 Line 1</div>
+            <div class="step-tag">3 stops · 8 min</div>
+            <div class="step-tag">₹ Check token</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step-item">
+        <div class="step-left">
+          <div class="step-circle" style="background: rgba(0,217,165,0.15); color: var(--green);">🏁</div>
+        </div>
+        <div class="step-right">
+          <div class="step-action">Arrive at BKC</div>
+          <div class="step-detail">Exit via Gate 1 for main BKC complex · 12:20 PM</div>
+          <div class="step-tags">
+            <div class="step-tag" style="color: var(--green);">✅ Destination</div>
+            <div class="step-tag">2 min walk</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track Train Button -->
+    <div style="padding: 0 20px 12px; display: flex; gap: 10px;">
+      <div class="ai-search-btn" style="flex: 1; margin: 0;" onclick="showMap()">
+        🗺️ Track on Map
+      </div>
+      <div class="icon-btn" style="width: 48px; height: 48px; border-radius: 14px;" onclick="showToast()">⭐</div>
+    </div>
+    <div style="padding: 0 20px 16px; display: flex; gap: 10px;">
+      <div style="flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text2);" onclick="showToast()">
+        🔔 Set Alerts
+      </div>
+      <div style="flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px; text-align: center; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text2);">
+        📤 Share Route
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="navClick('home')">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+    </div>
+    <div class="nav-item" id="nav-search" onclick="navClick('search')">
+      <div class="nav-icon">🔍</div>
+      <div class="nav-label">Search</div>
+    </div>
+    <div class="nav-item" id="nav-map" onclick="navClick('map')">
+      <div class="nav-icon">🗺️</div>
+      <div class="nav-label">Radar</div>
+    </div>
+    <div class="nav-item" id="nav-alerts" onclick="showToast()">
+      <div class="nav-icon">🔔</div>
+      <div class="nav-label">Alerts</div>
+    </div>
+    <div class="nav-item" id="nav-profile" onclick="navClick('profile')">
+      <div class="nav-icon">👤</div>
+      <div class="nav-label">Profile</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast">
+  <div class="toast-icon">⚠️</div>
+  <div class="toast-text">
+    <strong>Platform Change: Borivali Fast</strong>
+    Platform changed from 4 → 5. Train arrives in 3 min.
+  </div>
+  <div class="toast-close" onclick="hideToast()">✕</div>
+</div>
+
+<script>
+// ── STATE ──
+let currentScreen = 'home';
+let mapZoomLevel = 1;
+let etaInterval;
+let etaValue = 4;
+
+// ── NAVIGATION ──
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById('screen-' + name);
+  if (s) s.classList.add('active');
+  currentScreen = name;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const nav = document.getElementById('nav-' + name);
+  if (nav) nav.classList.add('active');
+  if (name === 'map') { setTimeout(drawMap, 100); startEtaCountdown(); }
+  else if (name === 'home') { setTimeout(drawMiniMap, 100); stopEtaCountdown(); }
+}
+
+function goHome() { showScreen('home'); }
+function showSearch() { showScreen('search'); }
+function showMap() { showScreen('map'); }
+function showDetail() { showScreen('detail'); }
+function showRoutes(from, to) {
+  document.getElementById('route-from').textContent = from || 'CST';
+  document.getElementById('route-to').textContent = to || 'BKC';
+  showScreen('routes');
+}
+function navClick(name) {
+  if (name === 'home') goHome();
+  else if (name === 'search') showSearch();
+  else if (name === 'map') showMap();
+  else showScreen(name);
+}
+
+// ── SWAP INPUTS ──
+function swapInputs() {
+  const from = document.getElementById('from-input');
+  const to = document.getElementById('to-input');
+  const tmp = from.value;
+  from.value = to.value;
+  to.value = tmp;
+}
+
+// ── TOAST ──
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(hideToast, 4000);
+}
+function hideToast() {
+  document.getElementById('toast').classList.remove('show');
+}
+
+// ── DISRUPTION ──
+function toggleDisruption() {
+  const b = document.getElementById('disruption-banner');
+  b.style.display = b.style.display === 'block' ? 'none' : 'block';
+}
+
+// ── ETA COUNTDOWN ──
+function startEtaCountdown() {
+  etaValue = 4;
+  const el = document.getElementById('eta-counter');
+  if (el) el.textContent = etaValue;
+  etaInterval = setInterval(() => {
+    if (etaValue > 0) {
+      etaValue--;
+      if (el) el.textContent = etaValue;
+    } else {
+      etaValue = 4;
+      if (el) el.textContent = etaValue;
+    }
+  }, 8000);
+}
+function stopEtaCountdown() {
+  clearInterval(etaInterval);
+}
+
+// ── MINI MAP (Home preview) ──
+function drawMiniMap() {
+  const canvas = document.getElementById('mini-map');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  // Background
+  ctx.fillStyle = '#0d1929';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid lines (subtle)
+  ctx.strokeStyle = 'rgba(79,123,255,0.06)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 40) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 40) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+
+  // Western Line
+  ctx.strokeStyle = '#4F7BFF'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(60, 10); ctx.lineTo(80, 50); ctx.lineTo(100, 90); ctx.lineTo(120, 120); ctx.stroke();
+
+  // Central Line  
+  ctx.strokeStyle = '#00D9A5'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(200, 15); ctx.lineTo(210, 55); ctx.lineTo(230, 90); ctx.lineTo(260, 120); ctx.stroke();
+
+  // Harbour Line
+  ctx.strokeStyle = '#FF8C42'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(330, 20); ctx.lineTo(340, 60); ctx.lineTo(360, 100); ctx.lineTo(380, 120); ctx.stroke();
+
+  // Metro Line 1 (horizontal)
+  ctx.strokeStyle = '#E63946'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(100, 60); ctx.lineTo(200, 65); ctx.lineTo(300, 70); ctx.lineTo(380, 72); ctx.stroke();
+
+  // Trains
+  const trains = [
+    { x: 75, y: 48, color: '#4F7BFF' },
+    { x: 218, y: 58, color: '#00D9A5' },
+    { x: 348, y: 62, color: '#FF8C42' },
+    { x: 155, y: 63, color: '#E63946' },
+    { x: 270, y: 68, color: '#E63946' },
+  ];
+
+  trains.forEach(t => {
+    ctx.fillStyle = t.color;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    // Glow
+    const grd = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, 12);
+    grd.addColorStop(0, t.color + '44');
+    grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 12, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Station dots
+  const stations = [
+    { x: 200, y: 15, label: 'CST' },
+    { x: 230, y: 90, label: 'Kurla' },
+    { x: 300, y: 70, label: 'Ghatkopar' },
+  ];
+  stations.forEach(s => {
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(s.x, s.y, 3, 0, Math.PI * 2); ctx.fill();
+  });
+}
+
+// ── FULL MAP ──
+let trainPositions = [
+  { x: 0.18, y: 0.12, color: '#4F7BFF', label: 'Bor Fast', line: 'Western' },
+  { x: 0.50, y: 0.35, color: '#00D9A5', label: 'Thane Sl', line: 'Central' },
+  { x: 0.75, y: 0.55, color: '#FF8C42', label: 'Panvel', line: 'Harbour' },
+  { x: 0.38, y: 0.28, color: '#E63946', label: 'Metro L1', line: 'Metro Red' },
+  { x: 0.62, y: 0.30, color: '#E63946', label: 'Metro L1', line: 'Metro Red' },
+  { x: 0.28, y: 0.45, color: '#FFB703', label: 'Metro 2A', line: 'Metro Yellow' },
+  { x: 0.55, y: 0.20, color: '#4F7BFF', label: 'Virar Exp', line: 'Western' },
+  { x: 0.80, y: 0.40, color: '#00D9A5', label: 'CST Loc', line: 'Central' },
+];
+
+let mapAnimFrame = 0;
+
+function drawMap() {
+  const canvas = document.getElementById('map-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  const w = canvas.width, h = canvas.height;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // BG
+  ctx.fillStyle = '#0a1220';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(79,123,255,0.05)'; ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 30) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+
+  // Water body (Arabian Sea) - left side
+  const waterGrad = ctx.createLinearGradient(0, 0, 80, 0);
+  waterGrad.addColorStop(0, 'rgba(0,96,199,0.18)');
+  waterGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = waterGrad;
+  ctx.fillRect(0, 0, 80, h);
+
+  // ── RAIL LINES ──
+  // Western Line (left-center, N-S)
+  ctx.strokeStyle = '#4F7BFF'; ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(w*0.22, 0); ctx.lineTo(w*0.20, h*0.2); ctx.lineTo(w*0.18, h*0.5); ctx.lineTo(w*0.17, h*0.8); ctx.lineTo(w*0.16, h);
+  ctx.stroke();
+
+  // Central Line (center, N-S)
+  ctx.strokeStyle = '#00D9A5'; ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(w*0.50, 0); ctx.lineTo(w*0.50, h*0.25); ctx.lineTo(w*0.52, h*0.5); ctx.lineTo(w*0.54, h*0.75); ctx.lineTo(w*0.55, h);
+  ctx.stroke();
+
+  // Harbour Line (right side)
+  ctx.strokeStyle = '#FF8C42'; ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(w*0.50, h*0.3); ctx.lineTo(w*0.6, h*0.45); ctx.lineTo(w*0.7, h*0.6); ctx.lineTo(w*0.80, h*0.75); ctx.lineTo(w*0.85, h);
+  ctx.stroke();
+
+  // Metro Line 1 Red (horizontal mid)
+  ctx.strokeStyle = '#E63946'; ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(w*0.18, h*0.35); ctx.lineTo(w*0.40, h*0.33); ctx.lineTo(w*0.65, h*0.32); ctx.lineTo(w*0.85, h*0.31);
+  ctx.stroke();
+
+  // Metro Line 2A Yellow (top area)
+  ctx.strokeStyle = '#FFB703'; ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(w*0.18, h*0.10); ctx.lineTo(w*0.30, h*0.12); ctx.lineTo(w*0.40, h*0.15); ctx.lineTo(w*0.55, h*0.18);
+  ctx.stroke();
+
+  // ── STATIONS ──
+  const stations = [
+    { rx: 0.50, ry: 0.05, label: 'CST', major: true },
+    { rx: 0.50, ry: 0.35, label: 'Dadar', major: true },
+    { rx: 0.52, ry: 0.50, label: 'Kurla', major: true },
+    { rx: 0.65, ry: 0.32, label: 'Ghatkopar', major: true },
+    { rx: 0.18, ry: 0.10, label: 'Borivali', major: false },
+    { rx: 0.20, ry: 0.28, label: 'Bandra', major: false },
+    { rx: 0.85, ry: 0.31, label: 'Versova', major: false },
+    { rx: 0.50, ry: 0.75, label: 'Thane', major: false },
+  ];
+
+  stations.forEach(s => {
+    const sx = w * s.rx, sy = h * s.ry;
+    ctx.fillStyle = s.major ? '#fff' : 'rgba(255,255,255,0.7)';
+    ctx.beginPath(); ctx.arc(sx, sy, s.major ? 5 : 3, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#0a1220'; ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = s.major ? '#e8eeff' : 'rgba(232,238,255,0.6)';
+    ctx.font = `${s.major ? '600' : '400'} ${s.major ? 10 : 9}px Sora, sans-serif`;
+    ctx.fillText(s.label, sx + 6, sy + 4);
+  });
+
+  // ── ANIMATED TRAINS ──
+  const t = Date.now() / 1000;
+  trainPositions.forEach((train, i) => {
+    const oscillate = Math.sin(t * 0.3 + i * 1.2) * 0.02;
+    const tx = w * (train.x + oscillate);
+    const ty = h * (train.y + Math.cos(t * 0.25 + i) * 0.01);
+
+    // Glow
+    const grd = ctx.createRadialGradient(tx, ty, 0, tx, ty, 18);
+    grd.addColorStop(0, train.color + '55');
+    grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.arc(tx, ty, 18, 0, Math.PI * 2); ctx.fill();
+
+    // Train dot
+    ctx.fillStyle = train.color;
+    ctx.beginPath(); ctx.arc(tx, ty, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+
+    // Direction indicator
+    ctx.fillStyle = train.color;
+    ctx.beginPath(); ctx.arc(tx, ty - 9, 3, 0, Math.PI * 2); ctx.fill();
+
+    // Label on hover would go here
+  });
+
+  // User location pin
+  const ux = w * 0.50, uy = h * 0.05;
+  const pulseR = 14 + Math.sin(t * 2) * 4;
+  ctx.fillStyle = 'rgba(79,123,255,0.15)';
+  ctx.beginPath(); ctx.arc(ux, uy, pulseR, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#4F7BFF';
+  ctx.beginPath(); ctx.arc(ux, uy, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(ux, uy, 3, 0, Math.PI * 2); ctx.fill();
+
+  requestAnimationFrame(drawMap);
+}
+
+function mapZoom(factor) {
+  mapZoomLevel *= factor;
+  // Visual feedback only in prototype
+}
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  drawMiniMap();
+  setInterval(drawMiniMap, 3000);
+  setTimeout(showToast, 3000);
+});
+
+// Handle resize
+window.addEventListener('resize', () => {
+  if (currentScreen === 'map') drawMap();
+});
+</script>
+</body>
+</html>
